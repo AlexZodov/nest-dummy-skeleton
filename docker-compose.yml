@@ -1,0 +1,51 @@
+version: "3.7"
+
+services:
+    nest_skeleton_server:
+        container_name: nest_skeleton_server
+        build: ./server
+        expose:
+            - 3000
+        ports:
+            - 0.0.0.0:9999:3000
+            - 0.0.0.0:9998:9249
+        command: npm run start:debug
+        volumes:
+            - ./server:/usr/src/app
+        networks:
+            nest_skeleton_net:
+                ipv4_address: 172.16.100.10
+    
+    nest_skeleton_db:
+        container_name: nest_skeleton_db
+        image: arm64v8/postgres:latest
+        environment:
+            POSTGRES_DB: skeleton
+            POSTGRES_PASSWORD: password
+        ports:
+            - 4523:5432
+        volumes:
+            - nest_skeleton_db:/var/lib/postgresql/data
+        networks:
+            nest_skeleton_net:
+                ipv4_address: 172.16.100.11
+    
+    nest_skeleton_redis:
+        container_name: nest_skeleton_redis
+        image: arm64v8/redis
+        ports:
+            - 9736:6379
+        networks:
+            nest_skeleton_net:
+                ipv4_address: 172.16.100.12
+
+networks:
+    nest_skeleton_net:
+        name: nest_skeleton_net
+        ipam:
+            driver: default
+            config:
+            - subnet: 172.16.100.0/24
+
+volumes:
+    nest_skeleton_db: {}
